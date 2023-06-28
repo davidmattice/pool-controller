@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta http-equiv="refresh" content="60">
     <title>Pool Controller</title>
     <style>
         h1 {
@@ -138,15 +139,15 @@
                     <tr>
                         <td>
                             {% if poolactive == true %}
-                                {% if heatactive == false %}
-                                    <form method="post">
+                                <form method="post">
+                                    {% if heatactive == 0 %}
                                         <button class="button buttonGray" type="submit" value="heaton" name="activate" style="width: 100%">Heater Off</button>
-                                    </form>
-                                {% else %}
-                                    <form method="post">
-                                        <button class="button buttonGreen" type="submit" value="heatoff" name="activate" style="width: 100%">Heater On</button>
-                                    </form>
-                                {% endif %}
+                                    {% elif heatactive == 1 %}
+                                        <button class="button buttonGreen" type="submit" value="heatoff" name="activate" style="width: 100%">Heater Idle</button>
+                                    {% else %}
+                                        <button class="button buttonRed" type="submit" value="heatoff" name="activate" style="width: 100%">Heater Running</button>
+                                    {% endif %}
+                                </form>
                             {% else %}
                                 Heater
                             {% endif %}
