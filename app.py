@@ -8,7 +8,7 @@ import time
 from flask import Flask, render_template, request, url_for, flash, redirect
 from screenlogicpy.gateway import ScreenLogicGateway
 
-app = Flask(__name__)
+LOCAL_TESTING = True
 
 SPA_CIRCUIT = 500
 BLOWER_CIRCUIT = 501
@@ -25,9 +25,9 @@ SPA_BODY = 1
 HEAT_OFF = 0
 HEATER_ON = 3
 
-last_timestamp = None
-
+gateway = None
 equipment_status = {
+  'last_pass': None,
   'last_updated': None,
   'systemStatus': 0,
   'airTemp': 0, 
@@ -44,6 +44,11 @@ equipment_status = {
   'blowerRunning': 0,
   'heaterRunning': 0
 }
+
+#
+# Configure the app for Flask
+#
+app = Flask(__name__)
 
 #
 # Ensure we don't run too often
@@ -90,13 +95,53 @@ async def setCircuit(gateway, circuit, state):
   return state
 
 #
-# Retrieve the current gateway data
+# Connect to the Gateway
 #
 async def gatewayConnect():
-  gateway = ScreenLogicGateway()
+  global gateway
+
+  if LOCAL_TESTING:
+    return( True )
   hosts = [{"ip": "192.168.1.174", "port": "80"}]
-  await gateway.async_connect(**hosts[0])
-  return( gateway )
+  success = await gateway.async_connect(**hosts[0])
+  return( success )
+
+#
+# Disconnect from the Gateway
+#
+async def gatewayDisconnect():
+  global gateway
+
+  if LOCAL_TESTING:
+    return( True )
+  success = await gateway.async_disconnect()
+  return( success )
+
+#
+# Pull updated data from the gateway
+#
+async def gatewayUpdate():
+  global gateway
+
+  if LOCAL_TESTING:
+    return( True )
+  success = await gateway.async_update()  
+  return( success )
+
+async def gatewayGetData(*args):
+  global gateway
+
+  if LOCAL_TESTING == False:
+    data = gateway.get_data(*args)
+    return( data )
+  if args[0] == "controller":
+    return( 1 )
+  elif args[0] == "circuit":
+    return( equipment_status["poolRunning"])
+  elif args[0] == "body":
+    if args[2] == "last_temperature":
+      return( 72 )
+
 
 #
 # Main application code
@@ -104,82 +149,85 @@ async def gatewayConnect():
 # 
 @app.route('/', methods=['GET', 'POST'])
 async def index():
-  global last_timestamp
   global equipment_status
+  global gateway
   heatRunning = 0
   tempchange = None
   activate = None
+  success = None
 
   # Initialize the fist time in
-  if last_timestamp == None:
-    last_timestamp = time.time() - 60
+  if equipment_status['last_pass'] == None:
+    equipment_status['last_pass'] = time.time() - 60
 
-  # Ensure we don't call this too often - leave at least 2 seconds between calls
-  if time_passed(last_timestamp, 2):  
-    last_timestamp = time.time()
-    gateway = await gatewayConnect()
-    await gateway.async_update()
-    equipment_status['last_updated'] = time.time()
-    equipment_status['systemStatus'] = gateway.get_data("controller", "sensor", "state", "value")
-    equipment_status['airTemp'] = gateway.get_data("controller", "sensor", "air_temperature", "value")
-    equipment_status['poolRunning'] = gateway.get_data("circuit", POOL_CIRCUIT, "value")
-    equipment_status['poolTemp'] = gateway.get_data("body", 0, "last_temperature", "value")
-    equipment_status['poolSetTemp'] = gateway.get_data("body", 0, "heat_setpoint", "value")
-    equipment_status['poolHeatMode'] = gateway.get_data("body", 0, "heat_mode", "value")
-    equipment_status['poolHeatState'] = gateway.get_data("body", 0, "heat_state", "value")
-    equipment_status['spaRunning'] = gateway.get_data("circuit", SPA_CIRCUIT, "value")
-    equipment_status['spaTemp'] = gateway.get_data("body", 1, "last_temperature", "value")
-    equipment_status['spaSetTemp'] = gateway.get_data("body", 1, "heat_setpoint", "value")
-    equipment_status['spaHeatMode'] = gateway.get_data("body", 1, "heat_mode", "value")
-    equipment_status['spaHeatState'] = gateway.get_data("body", 1, "heat_state", "value")
-    equipment_status['blowerRunning'] = gateway.get_data("circuit", BLOWER_CIRCUIT, "value")
-    await gateway.async_disconnect()
+  # Ensure we don't call this too often - leave at least XX seconds between calls
+  if time_passed(equipment_status['last_pass'], 20):
+    equipment_status['last_pass'] = time.time()
+    success = await gatewayConnect()
+    if success:
+      await gatewayUpdate()
+      equipment_status['last_updated'] = time.time()
+      equipment_status['systemStatus'] = gateway.get_data("controller", "sensor", "state", "value")
+      equipment_status['airTemp'] = gateway.get_data("controller", "sensor", "air_temperature", "value")
+      equipment_status['poolRunning'] = gateway.get_data("circuit", POOL_CIRCUIT, "value")
+      equipment_status['poolTemp'] = gateway.get_data("body", 0, "last_temperature", "value")
+      equipment_status['poolSetTemp'] = gateway.get_data("body", 0, "heat_setpoint", "value")
+      equipment_status['poolHeatMode'] = gateway.get_data("body", 0, "heat_mode", "value")
+      equipment_status['poolHeatState'] = gateway.get_data("body", 0, "heat_state", "value")
+      equipment_status['spaRunning'] = gateway.get_data("circuit", SPA_CIRCUIT, "value")
+      equipment_status['spaTemp'] = gateway.get_data("body", 1, "last_temperature", "value")
+      equipment_status['spaSetTemp'] = gateway.get_data("body", 1, "heat_setpoint", "value")
+      equipment_status['spaHeatMode'] = gateway.get_data("body", 1, "heat_mode", "value")
+      equipment_status['spaHeatState'] = gateway.get_data("body", 1, "heat_state", "value")
+      equipment_status['blowerRunning'] = gateway.get_data("circuit", BLOWER_CIRCUIT, "value")
+      await gatewayDisconnect()
     
   if request.method == 'POST':
-    gateway = await gatewayConnect()
-    await gateway.async_update()
-    activate = request.form.get('activate')
-    if activate is not None:
-      if activate == "poolon":
-        #spaRunning = await setCircuit(gateway, SPA_CIRCUIT, CIRCUIT_OFF)
-        equipment_status['spaRunning'] = 0
-        equipment_status['poolRunning'] = await setCircuit(gateway, POOL_CIRCUIT, CIRCUIT_ON)
-      elif activate == "pooloff":
-        equipment_status['poolRunning'] = await setCircuit(gateway, POOL_CIRCUIT, CIRCUIT_OFF)
-      elif activate == "spaon":
-        #poolRunning = await setCircuit(gateway, POOL_CIRCUIT, CIRCUIT_OFF)
-        equipment_status['poolRunning'] = 0
-        equipment_status['spaRunning'] = await setCircuit(gateway, SPA_CIRCUIT, CIRCUIT_ON)
-      elif activate == "spaoff":
-        equipment_status['spaRunning'] = await setCircuit(gateway, SPA_CIRCUIT, CIRCUIT_OFF)
-      elif activate == "heaton":
-        if equipment_status['poolRunning']:
-          equipment_status['poolHeatMode'] = await setHeatMode(gateway, POOL_BODY, HEATER_ON)
-        elif equipment_status['spaRunning']:
-          equipment_status['spaHeatMode'] = await setHeatMode(gateway, SPA_BODY, HEATER_ON)
-      elif activate == "heatoff":
-        if equipment_status['poolRunning']:
-          equipment_status['poolHeatMode'] = await setHeatMode(gateway, POOL_BODY, HEAT_OFF)
-        elif equipment_status['spaRunning']:
-          equipment_status['spaHeatMode'] = await setHeatMode(gateway, SPA_BODY, HEAT_OFF)
-      elif activate == "bloweron":
-        if equipment_status['spaRunning']:
-          equipment_status['blowerRunning'] = await setCircuit(gateway, BLOWER_CIRCUIT, CIRCUIT_ON)
-      elif activate == "bloweroff":
-        equipment_status['blowerRunning'] = await setCircuit(gateway, BLOWER_CIRCUIT, CIRCUIT_OFF)
+    success = await gatewayConnect()
+    if success:
+      await gatewayUpdate()
+      activate = request.form.get('activate')
+      if activate is not None:
+        if activate == "poolon":
+          #spaRunning = await setCircuit(gateway, SPA_CIRCUIT, CIRCUIT_OFF)
+          equipment_status['spaRunning'] = 0
+          equipment_status['poolRunning'] = await setCircuit(gateway, POOL_CIRCUIT, CIRCUIT_ON)
+        elif activate == "pooloff":
+          equipment_status['poolRunning'] = await setCircuit(gateway, POOL_CIRCUIT, CIRCUIT_OFF)
+        elif activate == "spaon":
+          #poolRunning = await setCircuit(gateway, POOL_CIRCUIT, CIRCUIT_OFF)
+          equipment_status['poolRunning'] = 0
+          equipment_status['spaRunning'] = await setCircuit(gateway, SPA_CIRCUIT, CIRCUIT_ON)
+        elif activate == "spaoff":
+          equipment_status['spaRunning'] = await setCircuit(gateway, SPA_CIRCUIT, CIRCUIT_OFF)
+        elif activate == "heaton":
+          if equipment_status['poolRunning']:
+            equipment_status['poolHeatMode'] = await setHeatMode(gateway, POOL_BODY, HEATER_ON)
+          elif equipment_status['spaRunning']:
+            equipment_status['spaHeatMode'] = await setHeatMode(gateway, SPA_BODY, HEATER_ON)
+        elif activate == "heatoff":
+          if equipment_status['poolRunning']:
+            equipment_status['poolHeatMode'] = await setHeatMode(gateway, POOL_BODY, HEAT_OFF)
+          elif equipment_status['spaRunning']:
+            equipment_status['spaHeatMode'] = await setHeatMode(gateway, SPA_BODY, HEAT_OFF)
+        elif activate == "bloweron":
+          if equipment_status['spaRunning']:
+            equipment_status['blowerRunning'] = await setCircuit(gateway, BLOWER_CIRCUIT, CIRCUIT_ON)
+        elif activate == "bloweroff":
+          equipment_status['blowerRunning'] = await setCircuit(gateway, BLOWER_CIRCUIT, CIRCUIT_OFF)
 
-    tempchange = request.form.get('temp')
-    if tempchange is not None:
-      if equipment_status['poolRunning']:
-        equipment_status['poolSetTemp'] = await setTemp(gateway, POOL_BODY, equipment_status['poolSetTemp'], tempchange)
-      elif equipment_status['spaRunning']:
-        equipment_status['spaSetTemp'] = await setTemp(gateway, SPA_BODY, equipment_status['spaSetTemp'], tempchange)
-    
-    # At the end of the POST disconnect
-    await gateway.async_disconnect()
+      tempchange = request.form.get('temp')
+      if tempchange is not None:
+        if equipment_status['poolRunning']:
+          equipment_status['poolSetTemp'] = await setTemp(gateway, POOL_BODY, equipment_status['poolSetTemp'], tempchange)
+        elif equipment_status['spaRunning']:
+          equipment_status['spaSetTemp'] = await setTemp(gateway, SPA_BODY, equipment_status['spaSetTemp'], tempchange)
+      
+      # At the end of the POST disconnect
+      await gatewayDisconnect()
 
   # Update the heater information based on any changes made
-  if equipment_status['poolRunning'] == 1:
+  if equipment_status['poolRunning']:
     if equipment_status['poolHeatMode'] != 0 and equipment_status['poolHeatState'] != 0:
       heatRunning = 2
     elif equipment_status['poolHeatMode'] != 0 and equipment_status['poolHeatState'] == 0:
@@ -206,4 +254,8 @@ async def index():
                          poolsettemp=equipment_status['poolSetTemp'], 
                          spatemp=equipment_status['spaTemp'],
                          spasettemp=equipment_status['spaSetTemp'], 
-                         debug="")
+                         debug=equipment_status)
+
+if __name__ == "__main__":
+  gateway = ScreenLogicGateway()
+  app.run()
