@@ -37,15 +37,17 @@ equipment_status = {
   'poolSetTemp': 0,
   'poolHeatMode': 0,
   'poolHeatState': 0,
+  'poolLight': 0,
   'spaRunning': 0,
   'spaTemp': 0,
   'spaSetTemp': 0,
   'spaHeatMode': 0,
   'spaHeatState': 0,
+  'spaLight': 0,
   'blowerRunning': 0,
   'heaterRunning': 0
 }
-TEST_DEFAULTS = [None, None, 1, 99, 1, 75, 70, 0, 0, 0, 75, 95, 0, 0, 0, 0]
+TEST_DEFAULTS = [None, None, 1, 99, 1, 75, 70, 0, 0, 0, 0, 75, 95, 0, 0, 0, 0, 0]
 
 #
 # Configure the app for Flask
@@ -189,15 +191,18 @@ async def index():
         equipment_status['poolSetTemp'] = gateway.get_data("body", 0, "heat_setpoint", "value")
         equipment_status['poolHeatMode'] = gateway.get_data("body", 0, "heat_mode", "value")
         equipment_status['poolHeatState'] = gateway.get_data("body", 0, "heat_state", "value")
+        equipment_status['poolLight'] = gateway.get_data("circuit", POOL_LIGHT_CIRCUIT, "value")
         equipment_status['spaRunning'] = gateway.get_data("circuit", SPA_CIRCUIT, "value")
         equipment_status['spaTemp'] = gateway.get_data("body", 1, "last_temperature", "value")
         equipment_status['spaSetTemp'] = gateway.get_data("body", 1, "heat_setpoint", "value")
         equipment_status['spaHeatMode'] = gateway.get_data("body", 1, "heat_mode", "value")
         equipment_status['spaHeatState'] = gateway.get_data("body", 1, "heat_state", "value")
+        equipment_status['spaLight'] = gateway.get_data("circuit", SPA_LIGHT_CIRCUIT, "value")
         equipment_status['blowerRunning'] = gateway.get_data("circuit", BLOWER_CIRCUIT, "value")
       await gatewayDisconnect()
     
   if request.method == 'POST':
+  
     success = await gatewayConnect()
     if success:
       await gatewayUpdate()
@@ -215,6 +220,14 @@ async def index():
           equipment_status['spaRunning'] = await setCircuit(SPA_CIRCUIT, CIRCUIT_ON)
         elif activate == "spaoff":
           equipment_status['spaRunning'] = await setCircuit(SPA_CIRCUIT, CIRCUIT_OFF)
+        elif activate == "poollighton":
+          equipment_status['poolLight'] = await setCircuit(POOL_LIGHT_CIRCUIT, CIRCUIT_ON)
+        elif activate == "poollightoff":
+          equipment_status['poolLight'] = await setCircuit(POOL_LIGHT_CIRCUIT, CIRCUIT_OFF)
+        elif activate == "spalighton":
+          equipment_status['spaLight'] = await setCircuit(SPA_LIGHT_CIRCUIT, CIRCUIT_ON)
+        elif activate == "spalightoff":
+          equipment_status['spaLight'] = await setCircuit(SPA_LIGHT_CIRCUIT, CIRCUIT_OFF)
         elif activate == "heaton":
           if equipment_status['poolRunning']:
             equipment_status['poolHeatMode'] = await setHeatMode(POOL_BODY, HEATER_ON)
@@ -240,6 +253,18 @@ async def index():
       
       # At the end of the POST disconnect
       await gatewayDisconnect()
+
+  if LOCAL_TESTING:
+      if equipment_status['poolRunning'] and equipment_status['poolHeatMode']:
+        if equipment_status['poolTemp'] < equipment_status['poolSetTemp']:
+          equipment_status['poolHeatState'] = 1
+        else:
+          equipment_status['poolHeatState'] = 0
+      if equipment_status['spaRunning'] and equipment_status['spaHeatMode']:
+        if equipment_status['spaTemp'] < equipment_status['spaSetTemp']:
+          equipment_status['spaHeatState'] = 1
+        else:
+          equipment_status['spaHeatState'] = 0
 
   # Update the heater information based on any changes made
   if equipment_status['poolRunning']:
@@ -268,8 +293,10 @@ async def index():
                          pooltemp=equipment_status['poolTemp'], 
                          poolsettemp=equipment_status['poolSetTemp'], 
                          spatemp=equipment_status['spaTemp'],
-                         spasettemp=equipment_status['spaSetTemp'], 
-                         debug=equipment_status)
+                         spasettemp=equipment_status['spaSetTemp'],
+                         poollight=equipment_status['poolLight'],
+                         spalight=equipment_status['spaLight'],
+                         debug="")
 
 if __name__ == "__app__":
   gateway = ScreenLogicGateway()
