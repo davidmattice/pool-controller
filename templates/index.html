@@ -4,6 +4,9 @@
     <meta http-equiv="refresh" content="60">
     <title>Pool Controller</title>
     <style>
+        * {
+             box-sizing: border-box;
+        }
         h1 {
             text-align: center;
         }
@@ -12,16 +15,24 @@
         }
         table {
             width: 100%;
+            border: 1px white;
             border-collapse: collapse;
+            font-size: 16px;
+        }
+        tr {
+            height: 60px;
+        }
+        .trThin {
+            height: 40px;
         }
         th, td {
             border: 1px solid #ddd;
-            padding: 8px;
+            padding: 2px;
             text-align: center;
         }
         .button {
             border: none;
-            padding: 15px 32px;
+            padding: 15px 25px;
             text-align: center;
             text-decoration: none;
             display: inline-block;
@@ -35,7 +46,7 @@
             text-align: center;
             text-decoration: none;
             display: inline-block;
-            font-size: 12px;
+            font-size: 16px;
             margin: 0px 2px;
             cursor: pointer;
         }
@@ -51,159 +62,255 @@
             background-color: #FF0000; /* Red */
             color: white;
         }
+
+        /* Create four equal columns that floats next to each other */
+        .column {
+            float: left;
+            width: 50%;
+            padding: 5px;
+        }
+
+        /* Clear floats after the columns */
+        .row:after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+
+        /* Responsive layout - makes the two columns stack on top of each other instead of next to each other */
+        @media screen and (max-width: 600px) {
+            .column  {
+                width: 100%;
+            }
+        }
+
+        /* Responsive layout - for mobile in portrait (standard) position */        
+        @media screen and (pointer: coarse) and (orientation:portrait) {
+            .column  {
+                width: 100%;
+            }
+            h1 {
+                font-size: 64px;
+            }
+            table {
+                font-size: 64px;
+            }
+            tr {
+                height: 180px;
+            }
+            .trThin {
+                height: 160px;
+            }
+            .button {
+                font-size: 64px
+            }
+            .buttonSmall {
+                font-size: 64px
+            }
+        }
+        /* Responsive layout - makes the two columns stack on top of each other instead of next to each other */        
+        @media screen and (pointer: coarse) and (orientation:landscape) {
+            .column  {
+                width: 50%;
+            }
+            table {
+                font-size: 24px;
+            }
+            .button {
+                font-size: 24px
+            }
+            .buttonSmall {
+                font-size: 24px
+            }
+        }
     </style>
 </head>
 <body>
     {% if systemstatus == 1 %}
     <h1>Pool Controller - {{ airtemp }}&deg;F</h1>
-    <table>
-        <tr>
-            <td>
-                <form method="post">
-                    {% if poolactive == true %}
-                        <button class="button buttonGreen" type="submit" value="pooloff" name="activate" style="width: 100%">Pool - {{ pooltemp }}&deg;F</button>
-                    {% else %}
-                        <button class="button buttonGray" type="submit" value="poolon" name="activate" style="width: 100%">Pool - {{ pooltemp }}&deg;F</button>
-                    {% endif %}
-                </form>
-            </td>
-            <td>
-                <form method="post">
-                    {% if spaactive == true %}
-                        <button class="button buttonGreen" type="submit" value="spaoff" name="activate" style="width: 100%">Spa - {{ spatemp }}&deg;F</button>
-                    {% else %}
-                        <button class="button buttonGray" type="submit" value="spaon" name="activate" style="width: 100%">Spa - {{ spatemp }}&deg;F</button>
-                    {% endif %}
-                </form>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <table>
-                    <tr>
-                        <td>
+    <div class="row">
+        <div class="column">
+            <table>
+                <tr>
+                    <td>
+                        <form method="post">
+                            {% if poollight == true %}
+                                <button class="button buttonGreen" type="submit" value="poollightoff" name="activate" style="width: 100%">Turn Pool Light Off</button>
+                            {% else %}
+                                <button class="button buttonGray" type="submit" value="poollighton" name="activate" style="width: 100%">Turn Pool Light On</button>
+                            {% endif %}
+                        </form>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div class="column">
+            <table>
+                <tr>
+                    <td>
+                        <form method="post">
+                            {% if spalight == true %}
+                                <button class="button buttonGreen" type="submit" value="spalightoff" name="activate" style="width: 100%">Turn Spa Light Off</button>
+                            {% else %}
+                                <button class="button buttonGray" type="submit" value="spalighton" name="activate" style="width: 100%">Turn Spa Light On</button>
+                            {% endif %}
+                        </form>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div class="column">
+            <table>
+                <tr>
+                    <td>
+                        <form method="post">
                             {% if poolactive == true %}
-                                <form method="post">
-                                    <button class="buttonSmall buttonGreen" type="submit" value="decrease" name="temp" style="width: 100%">-</button>
-                                </form>
+                                <button class="button buttonGreen" type="submit" value="pooloff" name="activate" style="width: 100%">Turn Pool Off - {{ pooltemp }}&deg;F</button>
                             {% else %}
-                                -
+                                <button class="button buttonGray" type="submit" value="poolon" name="activate" style="width: 100%">Turn Pool On - {{ pooltemp }}&deg;F</button>
                             {% endif %}
-                        </td>
-                        <td>
-                            {{ poolsettemp }}&deg;F
-                        </td>
-                        <td>
-                            {% if poolactive == true %}
-                                <form method="post">
-                                    <button class="buttonSmall buttonGreen" type="submit" value="increase" name="temp" style="width: 100%">+</button>
-                                </form>
-                            {% else %}
-                                +
-                            {% endif %}
-                        </td>
-                    </tr>
-                </table>
-            </td>
-            <td>
-                <table>
-                    <tr>
-                        <td>
-                            {% if spaactive == true %}
-                                <form method="post">
-                                    <button class="buttonSmall buttonGreen" type="submit" value="decrease" name="temp" style="width: 100%">-</button>
-                                </form>
-                            {% else %}
-                                -
-                            {% endif %}
-                        </td>
-                        <td>
-                            {{ spasettemp }}&deg;F
-                        </td>
-                        <td>
-                            {% if spaactive == true %}
-                                <form method="post">
-                                    <button class="buttonSmall buttonGreen" type="submit" value="increase" name="temp" style="width: 100%">+</button>
-                                </form>
-                            {% else %}
-                                +
-                            {% endif %}
-                        </td>
-                    </tr>
-                </table>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <table>
-                    <tr>
-                        <td>
-                            {% if poolactive == true %}
-                                <form method="post">
-                                    {% if heatactive == 0 %}
-                                        <button class="button buttonGray" type="submit" value="heaton" name="activate" style="width: 100%">Heater Off</button>
-                                    {% elif heatactive == 1 %}
-                                        <button class="button buttonGreen" type="submit" value="heatoff" name="activate" style="width: 100%">Heater Idle</button>
+                        </form>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <table>
+                            <tr class="trThin">
+                                <td>
+                                    {% if poolactive == true %}
+                                        <form method="post">
+                                            <button class="buttonSmall buttonGreen" type="submit" value="decrease" name="temp" style="width: 100%">-</button>
+                                        </form>
                                     {% else %}
-                                        <button class="button buttonRed" type="submit" value="heatoff" name="activate" style="width: 100%">Heater Running</button>
+                                        -
                                     {% endif %}
+                                </td>
+                                <td>
+                                    {{ poolsettemp }}&deg;F
+                                </td>
+                                <td>
+                                    {% if poolactive == true %}
+                                        <form method="post">
+                                            <button class="buttonSmall buttonGreen" type="submit" value="increase" name="temp" style="width: 100%">+</button>
+                                        </form>
+                                    {% else %}
+                                        +
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        {% if poolactive == true %}
+                            <form method="post">
+                                {% if heatactive == 0 %}
+                                    <button class="button buttonGray" type="submit" value="heaton" name="activate" style="width: 100%">Turn Heater On</button>
+                                {% elif heatactive == 1 %}
+                                    <button class="button buttonGreen" type="submit" value="heatoff" name="activate" style="width: 100%">Heater Idle</button>
+                                {% else %}
+                                    <button class="button buttonRed" type="submit" value="heatoff" name="activate" style="width: 100%">Heater Running</button>
+                                {% endif %}
+                            </form>
+                        {% else %}
+                            Heater
+                        {% endif %}
+                    </td>
+                </tr>
+                {% if debug != "" %}
+                    <tr>
+                        <td style="word-wrap: normal;">{{ debug }}</td>
+                    </tr>
+                {% endif %}
+            </table>
+        </div>
+        <div class="column">    
+            <table>
+                <tr>
+                    <td>
+                        <form method="post">
+                            {% if spaactive == true %}
+                                <button class="button buttonGreen" type="submit" value="spaoff" name="activate" style="width: 100%">Turn Spa Off - {{ spatemp }}&deg;F</button>
+                            {% else %}
+                                <button class="button buttonGray" type="submit" value="spaon" name="activate" style="width: 100%">Turn Spa On - {{ spatemp }}&deg;F</button>
+                            {% endif %}
+                        </form>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <table>
+                            <tr class="trThin">
+                                <td>
+                                    {% if spaactive == true %}
+                                        <form method="post">
+                                            <button class="buttonSmall buttonGreen" type="submit" value="decrease" name="temp" style="width: 100%">-</button>
+                                        </form>
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {{ spasettemp }}&deg;F
+                                </td>
+                                <td>
+                                    {% if spaactive == true %}
+                                        <form method="post">
+                                            <button class="buttonSmall buttonGreen" type="submit" value="increase" name="temp" style="width: 100%">+</button>
+                                        </form>
+                                    {% else %}
+                                        +
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        {% if spaactive == true %}
+                            <form method="post">
+                                {% if heatactive == 0 %}
+                                    <button class="button buttonGray" type="submit" value="heaton" name="activate" style="width: 100%">Turn Heater On</button>
+                                {% elif heatactive == 1 %}
+                                    <button class="button buttonGreen" type="submit" value="heatoff" name="activate" style="width: 100%">Heater Idle</button>
+                                {% else %}
+                                    <button class="button buttonRed" type="submit" value="heatoff" name="activate" style="width: 100%">Heater Running</button>
+                                {% endif %}
+                            </form>
+                        {% else %}
+                            Heater
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        {% if spaactive == true %}
+                            {% if bloweractive == false %}
+                                <form method="post">
+                                    <button class="button buttonGray" type="submit" value="bloweron" name="activate" style="width: 100%">Turn Blower On</button>
                                 </form>
                             {% else %}
-                                Heater
+                                <form method="post">
+                                    <button class="button buttonGreen" type="submit" value="bloweroff" name="activate" style="width: 100%">Turn Blower Off</button>
+                                </form>
                             {% endif %}
-                        </td>
-                    </tr>
-                </table>
-            </td>
-            <td>
-                <table>
-                    <tr>
-                        <td>
-                            {% if spaactive == true %}
-                                {% if heatactive == false %}
-                                    <form method="post">
-                                        <button class="button buttonGray" type="submit" value="heaton" name="activate" style="width: 100%">Heater Off</button>
-                                    </form>
-                                {% else %}
-                                    <form method="post">
-                                        <button class="button buttonGreen" type="submit" value="heatoff" name="activate" style="width: 100%">Heater On</button>
-                                    </form>
-                                {% endif %}
-                            {% else %}
-                                Heater
-                            {% endif %}
-                        </td>
-                    </tr>
-                </table>
-            </td>
-        </tr>
-        <tr>
-            <td>{{ debug }}</td>
-            <td>
-                <table>
-                    <tr>
-                        <td>
-                            {% if spaactive == true %}
-                                {% if bloweractive == false %}
-                                    <form method="post">
-                                        <button class="button buttonGray" type="submit" value="bloweron" name="activate" style="width: 100%">Blower Off</button>
-                                    </form>
-                                {% else %}
-                                    <form method="post">
-                                        <button class="button buttonGreen" type="submit" value="bloweroff" name="activate" style="width: 100%">Blower On</button>
-                                    </form>
-                                {% endif %}
-                            {% else %}
-                                Blower
-                            {% endif %}
-                        </td>
-                    </tr>
-                </table>
-            </td>
-        </tr>
-    </table>
+                        {% else %}
+                            Blower
+                        {% endif %}
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>    
     {% else %}
     <h1>Maintenance Mode Active</h1>
+    <table>
+        <tr>
+            <td>{{ debug }}</td>
+        </tr>
+    </table>
     {% endif %}
 </body>
 </html>
