@@ -298,5 +298,5 @@ async def index():
                          spalight=equipment_status['spaLight'],
                          debug="")
 
-if __name__ == "__app__":
+if __name__ == "app":
   gateway = ScreenLogicGateway()
