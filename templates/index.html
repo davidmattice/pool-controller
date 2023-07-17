@@ -84,19 +84,43 @@
             }
         }
 
-        /* Responsive layout - makes the two columns stack on top of each other instead of next to each other */        
-        @media screen and (pointer: coarse) {
+        /* Responsive layout - for mobile in portrait (standard) position */        
+        @media screen and (pointer: coarse) and (orientation:portrait) {
             .column  {
                 width: 100%;
             }
+            h1 {
+                font-size: 64px;
+            }
             table {
                 font-size: 64px;
+            }
+            tr {
+                height: 180px;
+            }
+            .trThin {
+                height: 160px;
             }
             .button {
                 font-size: 64px
             }
             .buttonSmall {
                 font-size: 64px
+            }
+        }
+        /* Responsive layout - makes the two columns stack on top of each other instead of next to each other */        
+        @media screen and (pointer: coarse) and (orientation:landscape) {
+            .column  {
+                width: 50%;
+            }
+            table {
+                font-size: 24px;
+            }
+            .button {
+                font-size: 24px
+            }
+            .buttonSmall {
+                font-size: 24px
             }
         }
     </style>

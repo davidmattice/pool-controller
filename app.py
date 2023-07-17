@@ -8,7 +8,7 @@ import time
 from flask import Flask, render_template, request, url_for, flash, redirect
 from screenlogicpy.gateway import ScreenLogicGateway
 
-LOCAL_TESTING = True
+LOCAL_TESTING = False
 
 SPA_CIRCUIT = 500
 BLOWER_CIRCUIT = 501
