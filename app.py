@@ -123,7 +123,7 @@ async def gatewayConnect():
   if LOCAL_TESTING:
     return( True )
   
-  ip = os.gegetenv("IP_ADDR")
+  ip = os.getenv("IP_ADDR")
   if ip != None:
     hosts = [{"ip": ip, "port": "80"}]
     success = await gateway.async_connect(**hosts[0])
