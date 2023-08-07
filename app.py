@@ -288,20 +288,23 @@ async def index():
       heatRunning = 0
 
   # Update the page
-  return render_template('index.html', 
-                         systemstatus=equipment_status['systemStatus'], 
-                         poolactive=equipment_status['poolRunning'], 
-                         spaactive=equipment_status['spaRunning'], 
-                         heatactive=heatRunning, 
-                         bloweractive=equipment_status['blowerRunning'], 
-                         airtemp=equipment_status['airTemp'], 
-                         pooltemp=equipment_status['poolTemp'], 
-                         poolsettemp=equipment_status['poolSetTemp'], 
-                         spatemp=equipment_status['spaTemp'],
-                         spasettemp=equipment_status['spaSetTemp'],
-                         poollight=equipment_status['poolLight'],
-                         spalight=equipment_status['spaLight'],
-                         debug="")
+  if success:
+    return render_template('index.html', 
+                          systemstatus=equipment_status['systemStatus'], 
+                          poolactive=equipment_status['poolRunning'], 
+                          spaactive=equipment_status['spaRunning'], 
+                          heatactive=heatRunning, 
+                          bloweractive=equipment_status['blowerRunning'], 
+                          airtemp=equipment_status['airTemp'], 
+                          pooltemp=equipment_status['poolTemp'], 
+                          poolsettemp=equipment_status['poolSetTemp'], 
+                          spatemp=equipment_status['spaTemp'],
+                          spasettemp=equipment_status['spaSetTemp'],
+                          poollight=equipment_status['poolLight'],
+                          spalight=equipment_status['spaLight'],
+                          debug="")
+  else:
+    return render_template('error.html')
 
 if __name__ == "app":
   gateway = ScreenLogicGateway()
