@@ -26,41 +26,100 @@
             height: 40px;
         }
         th, td {
-            border: 1px solid #ddd;
+            border: none;
             padding: 2px;
             text-align: center;
         }
-        .button {
-            border: none;
-            padding: 15px 25px;
-            text-align: center;
-            text-decoration: none;
+
+        /* Create Button Styles */
+        .btn-blue {
+            -moz-box-shadow: 0px 6px 11px -7px #235cd6;
+            -webkit-box-shadow: 0px 6px 11px -7px #235cd6;
+            box-shadow: 0px 6px 11px -7px #235cd6;
+            background: -webkit-gradient(linear, left top, left bottom, color-stop(0.05, #277be8), color-stop(1, #528ade));
+            background: -moz-linear-gradient(top, #277be8 5%, #528ade 100%);
+            background: -webkit-linear-gradient(top, #277be8 5%, #528ade 100%);
+            background: -o-linear-gradient(top, #277be8 5%, #528ade 100%);
+            background: -ms-linear-gradient(top, #277be8 5%, #528ade 100%);
+            background: linear-gradient(to bottom, #277be8 5%, #528ade 100%);
+            filter: progid: DXImageTransform.Microsoft.gradient(startColorstr='#277be8', endColorstr='#528ade', GradientType=0);
+            -webkit-border-radius: 10px;
+            -moz-border-radius: 10px;
+            border-radius: 10px;
             display: inline-block;
-            font-size: 16px;
-            margin: 4px 2px;
+            border: 0px;
             cursor: pointer;
+            color: black !important;
+            font-family: Arial;
+            font-size: 20px;
+            font-weight: bold;
+            padding: 15px 25px;
+            text-decoration: none;
+        }
+        .btn-red {
+            -moz-box-shadow: 0px 6px 11px -7px #d6232c;
+            -webkit-box-shadow: 0px 6px 11px -7px #d6232c;
+            box-shadow: 0px 6px 11px -7px #d6232c;
+            background: -webkit-gradient(linear, left top, left bottom, color-stop(0.05, #e82727), color-stop(1, #de5252));
+            background: -moz-linear-gradient(top, #e82727 5%, #de5252 100%);
+            background: -webkit-linear-gradient(top, #e82727 5%, #de5252 100%);
+            background: -o-linear-gradient(top, #e82727 5%, #de5252 100%);
+            background: -ms-linear-gradient(top, #e82727 5%, #de5252 100%);
+            background: linear-gradient(to bottom, #e82727 5%, #de5252 100%);
+            filter: progid: DXImageTransform.Microsoft.gradient(startColorstr='#e82727', endColorstr='#de5252', GradientType=0);
+            -webkit-border-radius: 10px;
+            -moz-border-radius: 10px;
+            border-radius: 10px;
+            display: inline-block;
+            border: 0px;
+            cursor: pointer;
+            color: black !important;
+            font-family: Arial;
+            font-size: 20px;
+            font-weight: bold;
+            padding: 15px 25px;
+            text-decoration: none;
+        }
+        .btn-green {
+            -moz-box-shadow: 0px 6px 11px -7px #4a9425;
+            -webkit-box-shadow: 0px 6px 11px -7px #4a9425;
+            box-shadow: 0px 6px 11px -7px #4a9425;
+            background: -webkit-gradient(linear, left top, left bottom, color-stop(0.05, #4ba81c), color-stop(1, #379607));
+            background: -moz-linear-gradient(top, #4ba81c 5%, #379607 100%);
+            background: -webkit-linear-gradient(top, #4ba81c 5%, #379607 100%);
+            background: -o-linear-gradient(top, #4ba81c 5%, #379607 100%);
+            background: -ms-linear-gradient(top, #4ba81c 5%, #379607 100%);
+            background: linear-gradient(to bottom, #4ba81c 5%, #379607 100%);
+            filter: progid: DXImageTransform.Microsoft.gradient(startColorstr='#4ba81c', endColorstr='#379607', GradientType=0);
+            -webkit-border-radius: 10px;
+            -moz-border-radius: 10px;
+            border-radius: 10px;
+            display: inline-block;
+            border: 0px;
+            cursor: pointer;
+            color: black !important;
+            font-family: Arial;
+            font-size: 20px;
+            font-weight: bold;
+            padding: 15px 25px;
+            text-decoration: none;
+        }
+        /* Add special button actiones */
+        .btn-blue:disabled, .btn-green:disabled, .btn-red:disabled {
+            background: lightgray;
+            color: black !important;
+            cursor: not-allowed;
+        }
+        .btn-blue:hover, .btn-green:hover, .btn-red:hover {
+            color: white !important;
+        }
+        .btn-blue:active, .btn-green:active, .btn-red:active {
+            position: relative;
+            top: 1px;
         }
         .buttonSmall {
-            border: none;
             padding: 4px 2px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 16px;
             margin: 0px 2px;
-            cursor: pointer;
-        }
-        .buttonGreen {
-            background-color: #4CAF50; /* Green */
-            color: white;
-        }
-        .buttonGrey {
-            background-color: #e7e7e7; /* Gray */
-            color: black;
-        } 
-        .buttonRed {
-            background-color: #FF0000; /* Red */
-            color: white;
         }
 
         /* Create four equal columns that floats next to each other */
@@ -135,9 +194,9 @@
                     <td>
                         <form method="post">
                             {% if poollight == true %}
-                                <button class="button buttonGreen" type="submit" value="poollightoff" name="activate" style="width: 100%">Turn Pool Light Off</button>
+                                <button class="btn-green" type="submit" value="poollightoff" name="activate" style="width: 100%">Turn Pool Light Off</button>
                             {% else %}
-                                <button class="button buttonGray" type="submit" value="poollighton" name="activate" style="width: 100%">Turn Pool Light On</button>
+                                <button class="btn-blue" type="submit" value="poollighton" name="activate" style="width: 100%">Turn Pool Light On</button>
                             {% endif %}
                         </form>
                     </td>
@@ -150,9 +209,9 @@
                     <td>
                         <form method="post">
                             {% if spalight == true %}
-                                <button class="button buttonGreen" type="submit" value="spalightoff" name="activate" style="width: 100%">Turn Spa Light Off</button>
+                                <button class="btn-green" type="submit" value="spalightoff" name="activate" style="width: 100%">Turn Spa Light Off</button>
                             {% else %}
-                                <button class="button buttonGray" type="submit" value="spalighton" name="activate" style="width: 100%">Turn Spa Light On</button>
+                                <button class="btn-blue" type="submit" value="spalighton" name="activate" style="width: 100%">Turn Spa Light On</button>
                             {% endif %}
                         </form>
                     </td>
@@ -165,9 +224,9 @@
                     <td>
                         <form method="post">
                             {% if poolactive == true %}
-                                <button class="button buttonGreen" type="submit" value="pooloff" name="activate" style="width: 100%">Turn Pool Off - {{ pooltemp }}&deg;F</button>
+                                <button class="btn-green" type="submit" value="pooloff" name="activate" style="width: 100%">Turn Pool Off - {{ pooltemp }}&deg;F</button>
                             {% else %}
-                                <button class="button buttonGray" type="submit" value="poolon" name="activate" style="width: 100%">Turn Pool On - {{ pooltemp }}&deg;F</button>
+                                <button class="btn-blue" type="submit" value="poolon" name="activate" style="width: 100%">Turn Pool On - {{ pooltemp }}&deg;F</button>
                             {% endif %}
                         </form>
                     </td>
@@ -177,25 +236,25 @@
                         <table>
                             <tr class="trThin">
                                 <td>
-                                    {% if poolactive == true %}
-                                        <form method="post">
-                                            <button class="buttonSmall buttonGreen" type="submit" value="decrease" name="temp" style="width: 100%">-</button>
-                                        </form>
-                                    {% else %}
-                                        -
-                                    {% endif %}
+                                    <form method="post">
+                                        {% if poolactive == true %}
+                                            <button class="buttonSmall btn-green" type="submit" value="decrease" name="temp" style="width: 100%">-</button>
+                                        {% else %}
+                                            <button class="buttonSmall btn-green" type="submit" value="decrease" name="temp" style="width: 100%" disabled>-</button>
+                                        {% endif %}
+                                    </form>
                                 </td>
                                 <td>
                                     {{ poolsettemp }}&deg;F
                                 </td>
                                 <td>
-                                    {% if poolactive == true %}
-                                        <form method="post">
-                                            <button class="buttonSmall buttonGreen" type="submit" value="increase" name="temp" style="width: 100%">+</button>
-                                        </form>
-                                    {% else %}
-                                        +
-                                    {% endif %}
+                                    <form method="post">
+                                        {% if poolactive == true %}
+                                            <button class="buttonSmall btn-green" type="submit" value="increase" name="temp" style="width: 100%">+</button>
+                                        {% else %}
+                                            <button class="buttonSmall btn-green" type="submit" value="increase" name="temp" style="width: 100%" disabled>+</button>
+                                        {% endif %}
+                                    </form>
                                 </td>
                             </tr>
                         </table>
@@ -203,19 +262,19 @@
                 </tr>
                 <tr>
                     <td>
-                        {% if poolactive == true %}
-                            <form method="post">
+                        <form method="post">
+                            {% if poolactive == true %}
                                 {% if heatactive == 0 %}
-                                    <button class="button buttonGray" type="submit" value="heaton" name="activate" style="width: 100%">Turn Heater On</button>
+                                    <button class="btn-blue" type="submit" value="heaton" name="activate" style="width: 100%">Turn Heater On</button>
                                 {% elif heatactive == 1 %}
-                                    <button class="button buttonGreen" type="submit" value="heatoff" name="activate" style="width: 100%">Heater Idle</button>
+                                    <button class="btn-green" type="submit" value="heatoff" name="activate" style="width: 100%">Heater Idle</button>
                                 {% else %}
-                                    <button class="button buttonRed" type="submit" value="heatoff" name="activate" style="width: 100%">Heater Running</button>
+                                    <button class="btn-red" type="submit" value="heatoff" name="activate" style="width: 100%">Heater Running</button>
                                 {% endif %}
-                            </form>
-                        {% else %}
-                            Heater
-                        {% endif %}
+                            {% else %}
+                                <button class="btn-blue" type="submit" value="heaton" name="activate" style="width: 100%" disabled>Heater</button>
+                            {% endif %}
+                        </form>
                     </td>
                 </tr>
                 {% if debug != "" %}
@@ -231,9 +290,9 @@
                     <td>
                         <form method="post">
                             {% if spaactive == true %}
-                                <button class="button buttonGreen" type="submit" value="spaoff" name="activate" style="width: 100%">Turn Spa Off - {{ spatemp }}&deg;F</button>
+                                <button class="btn-green" type="submit" value="spaoff" name="activate" style="width: 100%">Turn Spa Off - {{ spatemp }}&deg;F</button>
                             {% else %}
-                                <button class="button buttonGray" type="submit" value="spaon" name="activate" style="width: 100%">Turn Spa On - {{ spatemp }}&deg;F</button>
+                                <button class="btn-blue" type="submit" value="spaon" name="activate" style="width: 100%">Turn Spa On - {{ spatemp }}&deg;F</button>
                             {% endif %}
                         </form>
                     </td>
@@ -243,25 +302,23 @@
                         <table>
                             <tr class="trThin">
                                 <td>
-                                    {% if spaactive == true %}
-                                        <form method="post">
-                                            <button class="buttonSmall buttonGreen" type="submit" value="decrease" name="temp" style="width: 100%">-</button>
-                                        </form>
-                                    {% else %}
-                                        -
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    {{ spasettemp }}&deg;F
-                                </td>
-                                <td>
-                                    {% if spaactive == true %}
-                                        <form method="post">
-                                            <button class="buttonSmall buttonGreen" type="submit" value="increase" name="temp" style="width: 100%">+</button>
-                                        </form>
-                                    {% else %}
-                                        +
-                                    {% endif %}
+                                    <form method="post">
+                                        {% if spaactive == true %}
+                                            <button class="buttonSmall btn-green" type="submit" value="decrease" name="temp" style="width: 100%">-</button>
+                                        {% else %}
+                                            <button class="buttonSmall btn-green" type="submit" value="decrease" name="temp" style="width: 100%" disabled>-</button>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {{ spasettemp }}&deg;F
+                                    </td>
+                                    <td>
+                                        {% if spaactive == true %}
+                                            <button class="buttonSmall btn-green" type="submit" value="increase" name="temp" style="width: 100%">+</button>
+                                        {% else %}
+                                            <button class="buttonSmall btn-green" type="submit" value="increase" name="temp" style="width: 100%" disabled>+</button>
+                                        {% endif %}
+                                    </form>
                                 </td>
                             </tr>
                         </table>
@@ -269,36 +326,34 @@
                 </tr>
                 <tr>
                     <td>
-                        {% if spaactive == true %}
-                            <form method="post">
+                        <form method="post">
+                            {% if spaactive == true %}
                                 {% if heatactive == 0 %}
-                                    <button class="button buttonGray" type="submit" value="heaton" name="activate" style="width: 100%">Turn Heater On</button>
+                                    <button class="btn-blue" type="submit" value="heaton" name="activate" style="width: 100%">Turn Heater On</button>
                                 {% elif heatactive == 1 %}
-                                    <button class="button buttonGreen" type="submit" value="heatoff" name="activate" style="width: 100%">Heater Idle</button>
+                                    <button class="btn-green" type="submit" value="heatoff" name="activate" style="width: 100%">Heater Idle</button>
                                 {% else %}
-                                    <button class="button buttonRed" type="submit" value="heatoff" name="activate" style="width: 100%">Heater Running</button>
+                                    <button class="btn-red" type="submit" value="heatoff" name="activate" style="width: 100%">Heater Running</button>
                                 {% endif %}
-                            </form>
-                        {% else %}
-                            Heater
-                        {% endif %}
+                            {% else %}
+                                <button class="btn-blue" type="submit" value="heaton" name="activate" style="width: 100%" disabled>Heater</button>
+                            {% endif %}
+                        </form>
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        {% if spaactive == true %}
-                            {% if bloweractive == false %}
-                                <form method="post">
-                                    <button class="button buttonGray" type="submit" value="bloweron" name="activate" style="width: 100%">Turn Blower On</button>
-                                </form>
+                        <form method="post">
+                            {% if spaactive == true %}
+                                {% if bloweractive == false %}
+                                    <button class="btn-blue" type="submit" value="bloweron" name="activate" style="width: 100%">Turn Blower On</button>
+                                {% else %}
+                                    <button class="btn-green" type="submit" value="bloweroff" name="activate" style="width: 100%">Turn Blower Off</button>
+                                {% endif %}
                             {% else %}
-                                <form method="post">
-                                    <button class="button buttonGreen" type="submit" value="bloweroff" name="activate" style="width: 100%">Turn Blower Off</button>
-                                </form>
+                                <button class="btn-blue" type="submit" value="bloweron" name="activate" style="width: 100%" disabled>Blower</button>
                             {% endif %}
-                        {% else %}
-                            Blower
-                        {% endif %}
+                        </form>
                     </td>
                 </tr>
             </table>
