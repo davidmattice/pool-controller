@@ -288,7 +288,7 @@ async def index():
       heatRunning = 0
 
   # Update the page
-  if success:
+  if success != False:
     return render_template('index.html', 
                           systemstatus=equipment_status['systemStatus'], 
                           poolactive=equipment_status['poolRunning'], 
