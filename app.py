@@ -5,6 +5,7 @@ import argparse
 import sys
 import pprint
 import time
+import os
 from flask import Flask, render_template, request, url_for, flash, redirect
 from screenlogicpy.gateway import ScreenLogicGateway
 
@@ -117,13 +118,17 @@ async def setCircuit(circuit, state):
 #
 async def gatewayConnect():
   global gateway
+  ip = None
 
   if LOCAL_TESTING:
     return( True )
   
-  hosts = [{"ip": "192.168.1.174", "port": "80"}]
-  success = await gateway.async_connect(**hosts[0])
-  return( success )
+  ip = os.gegetenv("IP_ADDR")
+  if ip != None:
+    hosts = [{"ip": ip, "port": "80"}]
+    success = await gateway.async_connect(**hosts[0])
+    return( success )
+  return( False )
 
 #
 # Disconnect from the Gateway
