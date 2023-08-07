@@ -4,6 +4,8 @@ FROM python:3.10-slim-bullseye
 
 WORKDIR /python-docker
 
+ENV IP_ADDR=192.168.1.156
+
 COPY requirements.txt requirements.txt
 RUN pip3 install -r requirements.txt
 

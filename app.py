@@ -5,6 +5,7 @@ import argparse
 import sys
 import pprint
 import time
+import os
 from flask import Flask, render_template, request, url_for, flash, redirect
 from screenlogicpy.gateway import ScreenLogicGateway
 
@@ -117,13 +118,17 @@ async def setCircuit(circuit, state):
 #
 async def gatewayConnect():
   global gateway
+  ip = None
 
   if LOCAL_TESTING:
     return( True )
   
-  hosts = [{"ip": "192.168.1.174", "port": "80"}]
-  success = await gateway.async_connect(**hosts[0])
-  return( success )
+  ip = os.getenv("IP_ADDR")
+  if ip != None:
+    hosts = [{"ip": ip, "port": "80"}]
+    success = await gateway.async_connect(**hosts[0])
+    return( success )
+  return( False )
 
 #
 # Disconnect from the Gateway
@@ -283,20 +288,23 @@ async def index():
       heatRunning = 0
 
   # Update the page
-  return render_template('index.html', 
-                         systemstatus=equipment_status['systemStatus'], 
-                         poolactive=equipment_status['poolRunning'], 
-                         spaactive=equipment_status['spaRunning'], 
-                         heatactive=heatRunning, 
-                         bloweractive=equipment_status['blowerRunning'], 
-                         airtemp=equipment_status['airTemp'], 
-                         pooltemp=equipment_status['poolTemp'], 
-                         poolsettemp=equipment_status['poolSetTemp'], 
-                         spatemp=equipment_status['spaTemp'],
-                         spasettemp=equipment_status['spaSetTemp'],
-                         poollight=equipment_status['poolLight'],
-                         spalight=equipment_status['spaLight'],
-                         debug="")
+  if success != False:
+    return render_template('index.html', 
+                          systemstatus=equipment_status['systemStatus'], 
+                          poolactive=equipment_status['poolRunning'], 
+                          spaactive=equipment_status['spaRunning'], 
+                          heatactive=heatRunning, 
+                          bloweractive=equipment_status['blowerRunning'], 
+                          airtemp=equipment_status['airTemp'], 
+                          pooltemp=equipment_status['poolTemp'], 
+                          poolsettemp=equipment_status['poolSetTemp'], 
+                          spatemp=equipment_status['spaTemp'],
+                          spasettemp=equipment_status['spaSetTemp'],
+                          poollight=equipment_status['poolLight'],
+                          spalight=equipment_status['spaLight'],
+                          debug="")
+  else:
+    return render_template('error.html')
 
 if __name__ == "app":
   gateway = ScreenLogicGateway()
