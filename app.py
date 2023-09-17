@@ -28,9 +28,33 @@ HEATER_ON = 3
 
 gateway = None
 
+light_mode = [ 
+  "All Off",
+  "All On",
+  "Color Set",
+  "Color Sync",
+  "Color Swim",
+  "Party",
+  "Romance",
+  "Caribbean",
+  "American",
+  "Sunset",
+  "Royal",
+  "Save",
+  "Recall",
+  "Blue",
+  "Green",
+  "Red",
+  "White",
+  "Magenta",
+  "Thumper"
+  ]
+
 equipment_status = {
   'last_pass': None,
   'last_updated': None,
+  'poolLightMode': 13,
+  'spaLightmode': 13,
   'systemStatus': 0,
   'airTemp': 0, 
   'poolRunning': 0,
@@ -48,7 +72,7 @@ equipment_status = {
   'blowerRunning': 0,
   'heaterRunning': 0
 }
-TEST_DEFAULTS = [None, None, 1, 99, 1, 75, 70, 0, 0, 0, 0, 75, 95, 0, 0, 0, 0, 0]
+TEST_DEFAULTS = [None, None, None, None, 1, 99, 1, 75, 70, 0, 0, 0, 0, 75, 95, 0, 0, 0, 0, 0]
 
 #
 # Configure the app for Flask
@@ -173,6 +197,7 @@ async def index():
   global equipment_status
   global gateway
   heatRunning = 0
+  plightmode = None
   tempchange = None
   activate = None
   success = None
@@ -256,6 +281,21 @@ async def index():
         elif equipment_status['spaRunning']:
           equipment_status['spaSetTemp'] = await setTemp(SPA_BODY, equipment_status['spaSetTemp'], tempchange)
       
+      plightchange = request.form.get('plightmode')
+      if plightchange is not None:
+        if equipment_status['poolLight']:
+          plightmode = equipment_status['poolLightMode']
+          if plightchange == "increase":
+            plightmode = plightmode + 1
+          elif plightchange == "decrease":
+            plightmode = plightmode - 1
+          if plightmode >= 18:
+            plightmode = 4
+          if plightmode <= 3:
+            plightmode = 17
+          equipment_status['poolLightMode'] = plightmode
+          await gateway.async_set_color_lights(plightmode)
+      
       # At the end of the POST disconnect
       await gatewayDisconnect()
 
@@ -301,10 +341,13 @@ async def index():
                           spatemp=equipment_status['spaTemp'],
                           spasettemp=equipment_status['spaSetTemp'],
                           poollight=equipment_status['poolLight'],
+                          poollightmode=light_mode[equipment_status['poolLightMode']],
                           spalight=equipment_status['spaLight'],
                           debug="")
+                          # debug=gateway.get_data())
   else:
     return render_template('error.html')
 
 if __name__ == "app":
   gateway = ScreenLogicGateway()
+
