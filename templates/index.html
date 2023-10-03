@@ -170,6 +170,35 @@
                         </form>
                     </td>
                 </tr>
+                <tr>
+                    <td>
+                        <table>
+                            <tr class="trThin">
+                                <td>
+                                    <form method="post">
+                                        {% if poollight == true %}
+                                            <button class="btn-common btn-small btn-green" type="submit" value="decrease" name="plightmode" style="width: 100%">&lt;</button>
+                                        {% else %}
+                                            <button class="btn-common btn-small btn-green" type="submit" value="decrease" name="plightmode" style="width: 100%" disabled>&lt;</button>
+                                        {% endif %}
+                                    </form>
+                                </td>
+                                <td>
+                                    {{ poollightmode }}
+                                </td>
+                                <td>
+                                    <form method="post">
+                                        {% if poollight == true %}
+                                            <button class="btn-common btn-small btn-green" type="submit" value="increase" name="plightmode" style="width: 100%">&gt;</button>
+                                        {% else %}
+                                            <button class="btn-common btn-small btn-green" type="submit" value="increase" name="plightmode" style="width: 100%" disabled>&gt;</button>
+                                        {% endif %}
+                                    </form>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
             </table>
         </div>
         <div class="column">
@@ -183,6 +212,35 @@
                                 <button class="btn-common btn-blue" type="submit" value="spalighton" name="activate" style="width: 100%">Turn Spa Light On</button>
                             {% endif %}
                         </form>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <table>
+                            <tr class="trThin">
+                                <td>
+                                    <form method="post">
+                                        {% if spalight == true %}
+                                            <button class="btn-common btn-small btn-green" type="submit" value="decrease" name="slightmode" style="width: 100%">&lt;</button>
+                                        {% else %}
+                                            <button class="btn-common btn-small btn-green" type="submit" value="decrease" name="slightmode" style="width: 100%" disabled>&lt;</button>
+                                        {% endif %}
+                                    </form>
+                                </td>
+                                <td>
+                                    {{ spalightmode }}
+                                </td>
+                                <td>
+                                    <form method="post">
+                                        {% if spalight == true %}
+                                            <button class="btn-common btn-small btn-green" type="submit" value="increase" name="slightmode" style="width: 100%">&gt;</button>
+                                        {% else %}
+                                            <button class="btn-common btn-small btn-green" type="submit" value="increase" name="slightmode" style="width: 100%" disabled>&gt;</button>
+                                        {% endif %}
+                                    </form>
+                                </td>
+                            </tr>
+                        </table>
                     </td>
                 </tr>
             </table>
