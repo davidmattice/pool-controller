@@ -28,33 +28,27 @@ HEATER_ON = 3
 
 gateway = None
 
-light_mode = [ 
-  "All Off",
-  "All On",
-  "Color Set",
-  "Color Sync",
-  "Color Swim",
-  "Party",
-  "Romance",
-  "Caribbean",
-  "American",
-  "Sunset",
-  "Royal",
-  "Save",
-  "Recall",
-  "Blue",
-  "Green",
-  "Red",
-  "White",
-  "Magenta",
-  "Thumper"
-  ]
-
+lights = [
+  { "name": "Off", "id": 0 },
+  { "name": "On", "id": 1 },
+  { "name": "Color Swim", "id": 4 },
+  { "name": "Party", "id": 5 },
+  { "name": "Romance", "id": 6 },
+  { "name": "Caribbean", "id": 7 },
+  { "name": "American", "id": 8 },
+  { "name": "Sunset", "id": 9 },
+  { "name": "Royal", "id": 10 },
+  { "name": "Blue", "id": 13 },
+  { "name": "Green", "id": 14 },
+  { "name": "Red", "id": 15 },
+  { "name": "White", "id": 16 },
+  { "name": "Magenta", "id": 17 },
+  { "name": "Thumper", "id": 18 }
+]
+  
 equipment_status = {
   'last_pass': None,
   'last_updated': None,
-  'poolLightMode': 13,
-  'spaLightmode': 13,
   'systemStatus': 0,
   'airTemp': 0, 
   'poolRunning': 0,
@@ -63,6 +57,7 @@ equipment_status = {
   'poolHeatMode': 0,
   'poolHeatState': 0,
   'poolLight': 0,
+  'poolLightSetting': 0,
   'spaRunning': 0,
   'spaTemp': 0,
   'spaSetTemp': 0,
@@ -202,7 +197,7 @@ async def index():
   activate = None
   success = None
 
-  # Initialize the fist time in
+  # Initialize the fist time so there will be a call to get the status
   if equipment_status['last_pass'] == None:
     equipment_status['last_pass'] = time.time() - 60
 
@@ -229,6 +224,10 @@ async def index():
         equipment_status['spaHeatState'] = gateway.get_data("body", 1, "heat_state", "value")
         equipment_status['spaLight'] = gateway.get_data("circuit", SPA_LIGHT_CIRCUIT, "value")
         equipment_status['blowerRunning'] = gateway.get_data("circuit", BLOWER_CIRCUIT, "value")
+
+        # if the pool light is on, but we don't know the color, just set it to On
+        if equipment_status['poolLight'] == 1 and equipment_status['poolLightSetting'] == 0:
+          equipment_status['poolLightSetting'] = 1
       await gatewayDisconnect()
     
   if request.method == 'POST':
@@ -250,10 +249,6 @@ async def index():
           equipment_status['spaRunning'] = await setCircuit(SPA_CIRCUIT, CIRCUIT_ON)
         elif activate == "spaoff":
           equipment_status['spaRunning'] = await setCircuit(SPA_CIRCUIT, CIRCUIT_OFF)
-        elif activate == "poollighton":
-          equipment_status['poolLight'] = await setCircuit(POOL_LIGHT_CIRCUIT, CIRCUIT_ON)
-        elif activate == "poollightoff":
-          equipment_status['poolLight'] = await setCircuit(POOL_LIGHT_CIRCUIT, CIRCUIT_OFF)
         elif activate == "spalighton":
           equipment_status['spaLight'] = await setCircuit(SPA_LIGHT_CIRCUIT, CIRCUIT_ON)
         elif activate == "spalightoff":
@@ -281,21 +276,16 @@ async def index():
         elif equipment_status['spaRunning']:
           equipment_status['spaSetTemp'] = await setTemp(SPA_BODY, equipment_status['spaSetTemp'], tempchange)
       
-      plightchange = request.form.get('plightmode')
-      if plightchange is not None:
-        if equipment_status['poolLight']:
-          plightmode = equipment_status['poolLightMode']
-          if plightchange == "increase":
-            plightmode = plightmode + 1
-          elif plightchange == "decrease":
-            plightmode = plightmode - 1
-          if plightmode >= 18:
-            plightmode = 4
-          if plightmode <= 3:
-            plightmode = 17
-          equipment_status['poolLightMode'] = plightmode
-          await gateway.async_set_color_lights(plightmode)
-      
+      # Update the pool light setting, if changed
+      if request.form.get('poollightvalue') is not None:
+        equipment_status['poolLightSetting'] = int(request.form.get('poollightvalue'))
+        if equipment_status['poolLightSetting'] == 0:
+          equipment_status['poolLight'] = await setCircuit(POOL_LIGHT_CIRCUIT, CIRCUIT_OFF)
+        else:
+          if equipment_status['poolLight'] == 0:
+            equipment_status['poolLight'] = await setCircuit(POOL_LIGHT_CIRCUIT, CIRCUIT_ON)
+          await gateway.async_set_color_lights(equipment_status['poolLightSetting'])
+
       # At the end of the POST disconnect
       await gatewayDisconnect()
 
@@ -327,6 +317,12 @@ async def index():
     else:
       heatRunning = 0
 
+  # Ensure the light dropdowns are updated if the lights are changed from somewhere
+  if equipment_status['poolLight'] == 0:
+    poolLightSetting = 0
+  else:
+    poolLightSetting = equipment_status['poolLightSetting']
+
   # Update the page
   if success != False:
     return render_template('index.html', 
@@ -340,10 +336,12 @@ async def index():
                           poolsettemp=equipment_status['poolSetTemp'], 
                           spatemp=equipment_status['spaTemp'],
                           spasettemp=equipment_status['spaSetTemp'],
-                          poollight=equipment_status['poolLight'],
-                          poollightmode=light_mode[equipment_status['poolLightMode']],
+                          poollightsetting=poolLightSetting,
                           spalight=equipment_status['spaLight'],
-                          debug="")
+                          lights=lights,
+                          degub="")
+                          # debug=equipment_status)
+                          # debug=equipment_status['poolLightSetting'])
                           # debug=gateway.get_data())
   else:
     return render_template('error.html')
