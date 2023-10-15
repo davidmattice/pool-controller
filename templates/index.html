@@ -197,11 +197,16 @@
                 <tr>
                     <td>
                         <form method="post">
-                            {% if spalight == true %}
-                                <button class="btn-common btn-green" type="submit" value="spalightoff" name="activate" style="width: 100%">Turn Spa Light Off</button>
-                            {% else %}
-                                <button class="btn-common btn-blue" type="submit" value="spalighton" name="activate" style="width: 100%">Turn Spa Light On</button>
-                            {% endif %}
+                            <label>Spa Light: </label>
+                            <select class="dropdown-light" name="spalightvalue" onchange="this.form.submit()">
+                                {% for c in lights %}
+                                    {% if spalightsetting == c.id %}
+                                        <option value={{ c.id }} selected>{{ c.name }}</option>
+                                    {% else %}
+                                        <option value={{ c.id }}>{{ c.name }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
                         </form>
                     </td>
                 </tr>

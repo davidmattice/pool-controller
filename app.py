@@ -64,6 +64,7 @@ equipment_status = {
   'spaHeatMode': 0,
   'spaHeatState': 0,
   'spaLight': 0,
+  'spaLightSetting': 0,
   'blowerRunning': 0,
   'heaterRunning': 0
 }
@@ -142,7 +143,7 @@ async def gatewayConnect():
   if LOCAL_TESTING:
     return( True )
   
-  ip = os.getenv("IP_ADDR")
+  ip = os.getenv("IP_ADDR") # 156
   if ip != None:
     hosts = [{"ip": ip, "port": "80"}]
     success = await gateway.async_connect(**hosts[0])
@@ -249,10 +250,10 @@ async def index():
           equipment_status['spaRunning'] = await setCircuit(SPA_CIRCUIT, CIRCUIT_ON)
         elif activate == "spaoff":
           equipment_status['spaRunning'] = await setCircuit(SPA_CIRCUIT, CIRCUIT_OFF)
-        elif activate == "spalighton":
-          equipment_status['spaLight'] = await setCircuit(SPA_LIGHT_CIRCUIT, CIRCUIT_ON)
-        elif activate == "spalightoff":
-          equipment_status['spaLight'] = await setCircuit(SPA_LIGHT_CIRCUIT, CIRCUIT_OFF)
+        #elif activate == "spalighton":
+        #  equipment_status['spaLight'] = await setCircuit(SPA_LIGHT_CIRCUIT, CIRCUIT_ON)
+        #elif activate == "spalightoff":
+        #  equipment_status['spaLight'] = await setCircuit(SPA_LIGHT_CIRCUIT, CIRCUIT_OFF)
         elif activate == "heaton":
           if equipment_status['poolRunning']:
             equipment_status['poolHeatMode'] = await setHeatMode(POOL_BODY, HEATER_ON)
@@ -282,9 +283,19 @@ async def index():
         if equipment_status['poolLightSetting'] == 0:
           equipment_status['poolLight'] = await setCircuit(POOL_LIGHT_CIRCUIT, CIRCUIT_OFF)
         else:
-          if equipment_status['poolLight'] == 0:
-            equipment_status['poolLight'] = await setCircuit(POOL_LIGHT_CIRCUIT, CIRCUIT_ON)
+          # if equipment_status['poolLight'] == 0:  # Removed this to see if switch to pool light before changing allows changing of Pool and Spa seperatly
+          equipment_status['poolLight'] = await setCircuit(POOL_LIGHT_CIRCUIT, CIRCUIT_ON)
           await gateway.async_set_color_lights(equipment_status['poolLightSetting'])
+
+      # Update the spa light setting, if changed
+      if request.form.get('spalightvalue') is not None:
+        equipment_status['spaLightSetting'] = int(request.form.get('spalightvalue'))
+        if equipment_status['spaLightSetting'] == 0:
+          equipment_status['spaLight'] = await setCircuit(SPA_LIGHT_CIRCUIT, CIRCUIT_OFF)
+        else:
+          # if equipment_status['poolLight'] == 0:  # Removed this to see if switch to pool light before changing allows changing of Pool and Spa seperatly
+          equipment_status['spaLight'] = await setCircuit(SPA_LIGHT_CIRCUIT, CIRCUIT_ON)
+          await gateway.async_set_color_lights(equipment_status['spaLightSetting'])
 
       # At the end of the POST disconnect
       await gatewayDisconnect()
@@ -317,11 +328,17 @@ async def index():
     else:
       heatRunning = 0
 
-  # Ensure the light dropdowns are updated if the lights are changed from somewhere
+  # Ensure the light dropdowns are updated if the lights are changed from somewhere else
   if equipment_status['poolLight'] == 0:
     poolLightSetting = 0
   else:
     poolLightSetting = equipment_status['poolLightSetting']
+
+  # Ensure the light dropdowns are updated if the lights are changed from somewhere else
+  if equipment_status['spaLight'] == 0:
+    spaLightSetting = 0
+  else:
+    spaLightSetting = equipment_status['spaLightSetting']
 
   # Update the page
   if success != False:
@@ -337,7 +354,7 @@ async def index():
                           spatemp=equipment_status['spaTemp'],
                           spasettemp=equipment_status['spaSetTemp'],
                           poollightsetting=poolLightSetting,
-                          spalight=equipment_status['spaLight'],
+                          spalightsetting=spaLightSetting,
                           lights=lights,
                           degub="")
                           # debug=equipment_status)
