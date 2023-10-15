@@ -33,6 +33,18 @@
             text-align: center;
         }
 
+        /* Create the dropdown style */
+        .dropdown-light {
+            -webkit-border-radius: 10px;
+            -moz-border-radius: 10px;
+            border-radius: 10px;
+            color: black !important;
+            font-family: Arial;
+            font-size: 20px;
+            font-weight: bold;
+            padding: 15px 25px;
+        }
+
         /* Create Button Styles */
         .btn-common {
             -webkit-border-radius: 10px;
@@ -118,7 +130,7 @@
         }
 
         /* Responsive layout - makes the two columns stack on top of each other instead of next to each other */
-        @media screen and (max-width: 600px) {
+        @media screen and (max-width: 800px) {
             .column  {
                 width: 100%;
             }
@@ -144,6 +156,9 @@
             .btn-common  {
                 font-size: 64px
             }
+            .dropdown-light {
+                font-size: 64px
+            }
         }
         /* Responsive layout - makes the two columns stack on top of each other instead of next to each other */        
         @media screen and (pointer: coarse) and (orientation:landscape) {
@@ -162,41 +177,17 @@
                 <tr>
                     <td>
                         <form method="post">
-                            {% if poollight == true %}
-                                <button class="btn-common btn-green" type="submit" value="poollightoff" name="activate" style="width: 100%">Turn Pool Light Off</button>
-                            {% else %}
-                                <button class="btn-common btn-blue" type="submit" value="poollighton" name="activate" style="width: 100%">Turn Pool Light On</button>
-                            {% endif %}
+                            <label>Pool Light: </label>
+                            <select class="dropdown-light" name="poollightvalue" onchange="this.form.submit()">
+                                {% for c in lights %}
+                                    {% if poollightsetting == c.id %}
+                                        <option value={{ c.id }} selected>{{ c.name }}</option>
+                                    {% else %}
+                                        <option value={{ c.id }}>{{ c.name }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
                         </form>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <table>
-                            <tr class="trThin">
-                                <td>
-                                    <form method="post">
-                                        {% if poollight == true %}
-                                            <button class="btn-common btn-small btn-green" type="submit" value="decrease" name="plightmode" style="width: 100%">&lt;</button>
-                                        {% else %}
-                                            <button class="btn-common btn-small btn-green" type="submit" value="decrease" name="plightmode" style="width: 100%" disabled>&lt;</button>
-                                        {% endif %}
-                                    </form>
-                                </td>
-                                <td>
-                                    {{ poollightmode }}
-                                </td>
-                                <td>
-                                    <form method="post">
-                                        {% if poollight == true %}
-                                            <button class="btn-common btn-small btn-green" type="submit" value="increase" name="plightmode" style="width: 100%">&gt;</button>
-                                        {% else %}
-                                            <button class="btn-common btn-small btn-green" type="submit" value="increase" name="plightmode" style="width: 100%" disabled>&gt;</button>
-                                        {% endif %}
-                                    </form>
-                                </td>
-                            </tr>
-                        </table>
                     </td>
                 </tr>
             </table>
@@ -212,35 +203,6 @@
                                 <button class="btn-common btn-blue" type="submit" value="spalighton" name="activate" style="width: 100%">Turn Spa Light On</button>
                             {% endif %}
                         </form>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <table>
-                            <tr class="trThin">
-                                <td>
-                                    <form method="post">
-                                        {% if spalight == true %}
-                                            <button class="btn-common btn-small btn-green" type="submit" value="decrease" name="slightmode" style="width: 100%">&lt;</button>
-                                        {% else %}
-                                            <button class="btn-common btn-small btn-green" type="submit" value="decrease" name="slightmode" style="width: 100%" disabled>&lt;</button>
-                                        {% endif %}
-                                    </form>
-                                </td>
-                                <td>
-                                    {{ spalightmode }}
-                                </td>
-                                <td>
-                                    <form method="post">
-                                        {% if spalight == true %}
-                                            <button class="btn-common btn-small btn-green" type="submit" value="increase" name="slightmode" style="width: 100%">&gt;</button>
-                                        {% else %}
-                                            <button class="btn-common btn-small btn-green" type="submit" value="increase" name="slightmode" style="width: 100%" disabled>&gt;</button>
-                                        {% endif %}
-                                    </form>
-                                </td>
-                            </tr>
-                        </table>
                     </td>
                 </tr>
             </table>
@@ -390,7 +352,9 @@
     <h1>Maintenance Mode Active</h1>
     <table>
         <tr>
-            <td>{{ debug }}</td>
+            <td>
+                {{ debug }}
+            </td>
         </tr>
     </table>
     {% endif %}
