@@ -85,13 +85,19 @@ def time_passed(oldepoch, seconds):
 async def setLightMode(current_mode, new_mode):
   global gateway
   global equipment_status
-  ip = None                 # IP pulle dfrom Environment variable IP_ADDR
+  ip = None                 # IP from environment variable IP_ADDR
   hosts = None              # Hosts list to be passed to gateway connect
-  msg = ""                  # Return an error message on error
 
   ip = os.getenv("IP_ADDR")
-  if ip != None:
+  if ip == None:
+    equipment_status['last_msg'] = "IP_ADDR environment variable is not set"
+    return(False)
+
+  else:
+    # Set the hosts array for the controller
     hosts = [{"ip": ip, "port": "80"}]
+    # Clear any previous error messages
+    equipment_status['last_msg'] = ""
 
     try:
       await gateway.async_connect(**hosts[0])
@@ -108,12 +114,11 @@ async def setLightMode(current_mode, new_mode):
 # Adjust the temperature setting on the specific body of water
 #
 async def setTemp(body, set_temp, tempchange = None):
-  new_temp = set_temp
   global gateway
   global equipment_status
-  ip = None                 # IP pulle dfrom Environment variable IP_ADDR
+  new_temp = set_temp       # Default the new temperature to the old temperature
+  ip = None                 # IP from environment variable IP_ADDR
   hosts = None              # Hosts list to be passed to gateway connect
-  msg = ""                  # Return an error message on error
 
   if tempchange == "increase":
     new_temp = set_temp + 1
@@ -122,8 +127,15 @@ async def setTemp(body, set_temp, tempchange = None):
 
   if new_temp != set_temp:
     ip = os.getenv("IP_ADDR")
-    if ip != None:
+    if ip == None:
+      equipment_status['last_msg'] = "IP_ADDR environment variable is not set"
+      return(False)
+
+    else:
+      # Set the hosts array for the controller
       hosts = [{"ip": ip, "port": "80"}]
+      # Clear any previous error messages
+      equipment_status['last_msg'] = ""
 
       try:
         await gateway.async_connect(**hosts[0])
@@ -144,13 +156,19 @@ async def setTemp(body, set_temp, tempchange = None):
 async def setHeatMode(body, current_mode, new_mode):
   global gateway
   global equipment_status
-  ip = None                 # IP pulle dfrom Environment variable IP_ADDR
+  ip = None                 # IP from environment variable IP_ADDR
   hosts = None              # Hosts list to be passed to gateway connect
-  msg = ""                  # Return an error message on error
 
   ip = os.getenv("IP_ADDR")
-  if ip != None:
+  if ip == None:
+    equipment_status['last_msg'] = "IP_ADDR environment variable is not set"
+    return(False)
+
+  else:
+    # Set the hosts array for the controller
     hosts = [{"ip": ip, "port": "80"}]
+    # Clear any previous error messages
+    equipment_status['last_msg'] = ""
 
     try:
       await gateway.async_connect(**hosts[0])
@@ -169,13 +187,19 @@ async def setHeatMode(body, current_mode, new_mode):
 async def setCircuit(circuit, current_state, new_state):
   global gateway
   global equipment_status
-  ip = None                 # IP pulle dfrom Environment variable IP_ADDR
+  ip = None                 # IP from environment variable IP_ADDR
   hosts = None              # Hosts list to be passed to gateway connect
-  msg = ""                  # Return an error message on error
 
   ip = os.getenv("IP_ADDR")
-  if ip != None:
+  if ip == None:
+    equipment_status['last_msg'] = "IP_ADDR environment variable is not set"
+    return(False)
+
+  else:
+    # Set the hosts array for the controller
     hosts = [{"ip": ip, "port": "80"}]
+    # Clear any previous error messages
+    equipment_status['last_msg'] = ""
 
     try:
       await gateway.async_connect(**hosts[0])
@@ -189,55 +213,31 @@ async def setCircuit(circuit, current_state, new_state):
   return(new_state)
 
 #
-# Connect, pull adapter data and disconnect
+# Connect, pull adapter data, update global status array and disconnect
 #
 async def updateGatewayData():
   global gateway
   global equipment_status
-  ip = None                 # IP pulle dfrom Environment variable IP_ADDR
+  ip = None                 # IP from environment variable IP_ADDR
   hosts = None              # Hosts list to be passed to gateway connect
-  msg = ""                  # Return an error message on error
 
   ip = os.getenv("IP_ADDR")
-  if ip != None:
+  if ip == None:
+    equipment_status['last_msg'] = "IP_ADDR environment variable is not set"
+    return(False)
+
+  else:
+    # Set the hosts array for the controller
     hosts = [{"ip": ip, "port": "80"}]
+    # Clear any previous error messages
+    equipment_status['last_msg'] = ""
 
     try:
+
       await gateway.async_connect(**hosts[0])
       await gateway.async_update()
       await gateway.async_disconnect()
 
-    except ScreenLogicException as err:
-      equipment_status['last_msg'] = err
-      msg = err
-
-  return(msg)
-
-#
-# Main Flask loop
-# 
-@app.route('/', methods=['GET', 'POST'])
-async def index():
-  global equipment_status
-  global gateway
-
-  heatRunning = 0
-  plightmode = None
-  tempchange = None
-  activate = None
-  success = None
-  msg = ""
-
-  # Initialize the fist time so there will be a call to get the status
-  if equipment_status['last_pass'] == None:
-    equipment_status['last_pass'] = time.time() - 60
-
-  # Ensure we don't call this too often - leave at least XX seconds between calls
-  if time_passed(equipment_status['last_pass'], 20):
-    equipment_status['last_pass'] = time.time()
-    msg = await updateGatewayData()
-    if msg == "":
-      equipment_status['last_updated'] = time.time()
       equipment_status['systemStatus'] = gateway.get_data("controller", "sensor", "state", "value")
       equipment_status['airTemp'] = gateway.get_data("controller", "sensor", "air_temperature", "value")
       equipment_status['poolRunning'] = gateway.get_data("circuit", POOL_CIRCUIT, "value")
@@ -257,9 +257,43 @@ async def index():
       # if the pool light is on, but we don't know the color, just set it to On
       if equipment_status['poolLight'] == 1 and equipment_status['poolLightSetting'] == 0:
         equipment_status['poolLightSetting'] = 1
+
+      # Set the last updated time
+      equipment_status['last_updated'] = time.time()
+
+    except ScreenLogicException as err:
+      equipment_status['last_msg'] = err
+      return(False)
+
+  return(True)
+
+#
+# Main Flask loop
+# 
+@app.route('/', methods=['GET', 'POST'])
+async def index():
+  global equipment_status
+  global gateway
+  version = None
+  heatRunning = 0
+  tempchange = None
+  activate = None
+  success = True
+
+  # Initialize the rate limit control variable to the current time minus 5 minutes to ensure the status array is initialized.
+  if equipment_status['last_pass'] == None:
+    equipment_status['last_pass'] = time.time() - 600
+
+  # Rate limit GET calls to no more than one every 20 seconds. POST calls always happen and they update the status array used by the UI.
+  if time_passed(equipment_status['last_pass'], 20):
+    equipment_status['last_pass'] = time.time()
+    success = await updateGatewayData()
     
-  if request.method == 'POST':
+  # Don't process the post if the GET failed for any reason.
+  if success and request.method == 'POST':
     activate = request.form.get('activate')
+
+    # POST with a change to one of the primary control settings.
     if activate is not None:
       if activate == "poolon":
         equipment_status['spaRunning'] = CIRCUIT_OFF
@@ -291,6 +325,7 @@ async def index():
       elif activate == "bloweroff":
         equipment_status['blowerRunning'] = await setCircuit(BLOWER_CIRCUIT, equipment_status['blowerRunning'], CIRCUIT_OFF)
 
+    # POST with and update to one of the temperature settings
     tempchange = request.form.get('temp')
     if tempchange is not None:
       if equipment_status['poolRunning']:
@@ -298,7 +333,7 @@ async def index():
       elif equipment_status['spaRunning']:
         equipment_status['spaSetTemp'] = await setTemp(SPA_BODY, equipment_status['spaSetTemp'], tempchange)
     
-    # Update the pool light setting, if changed
+    # POST with an update the pool light setting.  Change color.
     if request.form.get('poollightvalue') is not None:
       if int(request.form.get('poollightvalue')) == 0:
         equipment_status['poolLight'] = await setCircuit(POOL_LIGHT_CIRCUIT, equipment_status['poolLight'], CIRCUIT_OFF)
@@ -308,6 +343,10 @@ async def index():
           equipment_status['poolLight'] = await setCircuit(POOL_LIGHT_CIRCUIT, equipment_status['poolLight'], CIRCUIT_ON)
         await setLightMode(equipment_status['poolLightSetting'], int(request.form.get('poollightvalue')))
         equipment_status['poolLightSetting'] = int(request.form.get('poollightvalue'))
+
+    # POST update status based on any error messages
+    if equipment_status['last_msg'] != "":
+      success = False
 
   # Update the heater information based on any changes made
   if equipment_status['poolRunning']:
@@ -325,7 +364,7 @@ async def index():
     else:
       heatRunning = 0
 
-  # Ensure the light dropdowns are updated if the lights are changed from somewhere
+  # Ensure the pool light dropdown is updated if the lights are changed from somewhere else
   if equipment_status['poolLight'] == 0:
     poolLightSetting = 0
   else:
@@ -333,6 +372,9 @@ async def index():
 
   # Update the page
   if success != False:
+    version = os.getenv("PC_VERSION")
+    if version == None:
+      version = "N/A"
     return render_template('index.html', 
                           systemstatus=equipment_status['systemStatus'], 
                           poolactive=equipment_status['poolRunning'], 
@@ -347,13 +389,13 @@ async def index():
                           poollightsetting=poolLightSetting,
                           spalight=equipment_status['spaLight'],
                           lights=lights,
-                          debug=equipment_status['last_msg'])
+                          version=version,
+                          debug="")
                           # debug=equipment_status)
                           # debug=equipment_status['poolLightSetting'])
                           # debug=gateway.get_data())
   else:
-    return render_template('error.html')
+    return render_template('error.html', msg=equipment_status['last_msg'])
 
 if __name__ == "app":
   gateway = ScreenLogicGateway()
-
