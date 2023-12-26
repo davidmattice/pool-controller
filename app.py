@@ -85,12 +85,12 @@ def time_passed(oldepoch, seconds):
 async def setLightMode(current_mode, new_mode):
   global gateway
   global equipment_status
-  ip = None                 # IP from environment variable IP_ADDR
+  ip = None                 # IP from environment variable PC_IP_ADDR
   hosts = None              # Hosts list to be passed to gateway connect
 
-  ip = os.getenv("IP_ADDR")
+  ip = os.getenv("PC_IP_ADDR")
   if ip == None:
-    equipment_status['last_msg'] = "IP_ADDR environment variable is not set"
+    equipment_status['last_msg'] = "PC_IP_ADDR environment variable is not set"
     return(False)
 
   else:
@@ -117,7 +117,7 @@ async def setTemp(body, set_temp, tempchange = None):
   global gateway
   global equipment_status
   new_temp = set_temp       # Default the new temperature to the old temperature
-  ip = None                 # IP from environment variable IP_ADDR
+  ip = None                 # IP from environment variable PC_IP_ADDR
   hosts = None              # Hosts list to be passed to gateway connect
 
   if tempchange == "increase":
@@ -126,9 +126,9 @@ async def setTemp(body, set_temp, tempchange = None):
     new_temp = set_temp - 1
 
   if new_temp != set_temp:
-    ip = os.getenv("IP_ADDR")
+    ip = os.getenv("PC_IP_ADDR")
     if ip == None:
-      equipment_status['last_msg'] = "IP_ADDR environment variable is not set"
+      equipment_status['last_msg'] = "PC_IP_ADDR environment variable is not set"
       return(False)
 
     else:
@@ -156,12 +156,12 @@ async def setTemp(body, set_temp, tempchange = None):
 async def setHeatMode(body, current_mode, new_mode):
   global gateway
   global equipment_status
-  ip = None                 # IP from environment variable IP_ADDR
+  ip = None                 # IP from environment variable PC_IP_ADDR
   hosts = None              # Hosts list to be passed to gateway connect
 
-  ip = os.getenv("IP_ADDR")
+  ip = os.getenv("PC_IP_ADDR")
   if ip == None:
-    equipment_status['last_msg'] = "IP_ADDR environment variable is not set"
+    equipment_status['last_msg'] = "PC_IP_ADDR environment variable is not set"
     return(False)
 
   else:
@@ -187,12 +187,12 @@ async def setHeatMode(body, current_mode, new_mode):
 async def setCircuit(circuit, current_state, new_state):
   global gateway
   global equipment_status
-  ip = None                 # IP from environment variable IP_ADDR
+  ip = None                 # IP from environment variable PC_IP_ADDR
   hosts = None              # Hosts list to be passed to gateway connect
 
-  ip = os.getenv("IP_ADDR")
+  ip = os.getenv("PC_IP_ADDR")
   if ip == None:
-    equipment_status['last_msg'] = "IP_ADDR environment variable is not set"
+    equipment_status['last_msg'] = "PC_IP_ADDR environment variable is not set"
     return(False)
 
   else:
@@ -218,12 +218,12 @@ async def setCircuit(circuit, current_state, new_state):
 async def updateGatewayData():
   global gateway
   global equipment_status
-  ip = None                 # IP from environment variable IP_ADDR
+  ip = None                 # IP from environment variable PC_IP_ADDR
   hosts = None              # Hosts list to be passed to gateway connect
 
-  ip = os.getenv("IP_ADDR")
+  ip = os.getenv("PC_IP_ADDR")
   if ip == None:
-    equipment_status['last_msg'] = "IP_ADDR environment variable is not set"
+    equipment_status['last_msg'] = "PC_IP_ADDR environment variable is not set"
     return(False)
 
   else:
