@@ -21,9 +21,11 @@ docker stop pool-controller;docker rm pool-controller;docker run -d -p 5000:5000
 
 Configure to be behind an **nginx** reverse proxy
 
+Add a DNS entry for the pool controller pointing to the host running the **nginx** reverse proxy container.
+
 Update proxy configuration (default.conf)
 ```
-# Pool CController
+# Pool Controller
 server {
         listen 80;
         server_name <poolcontroller>;  # FQDN of the pool controller name
@@ -38,8 +40,6 @@ server {
         error_log  /var/log/nginx/poolcontroller.err warn;
 }
 ```
-
-Add a DNS entry for the pool controller pointing to the host running the **nginx** reverse proxy container
 
 ## Docker Compose Configuration
 

@@ -6,7 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [2.0.1] - 2023-12-29
-- Update reverse proxy documentation
+- add reverse proxy configuration
+- Add docker compose configuration
+- Increased the font size for the footer on mobile
 
 ## [2.0.0] - 2023-12-26
 - Upgrade Python to 3.12
