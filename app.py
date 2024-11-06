@@ -5,7 +5,7 @@ import argparse
 import sys
 import pprint
 import time
-import datetime
+from datetime import datetime
 import os
 from flask import Flask, render_template, request, url_for, flash, redirect
 from screenlogicpy.gateway import ScreenLogicGateway
@@ -424,7 +424,7 @@ async def index():
                           spalight=equipment_status['spaLight'],
                           lights=lights,
                           version=version,
-                          debug="")
+                          debug=print(datetime.now()))
                           # debug=equipment_status())
                           # debug=equipment_status['poolLightSetting'])
                           # debug=gateway.get_data())
