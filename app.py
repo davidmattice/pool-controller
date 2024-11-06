@@ -106,9 +106,9 @@ async def setContollerTime():
 
     except ScreenLogicException as err:
       equipment_status['last_msg'] = err
-      return(current_mode)
+      return(False)
 
-  return(new_mode)
+  return(True)
 
 
 #
