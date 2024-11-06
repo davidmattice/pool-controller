@@ -315,7 +315,7 @@ async def index():
   # Initialize the rate limit control variable to the current time minus 5 minutes to ensure the status array is initialized.
   if equipment_status['last_pass'] == None:
     equipment_status['last_pass'] = time.time() - 600
-    await setContollerTime()
+    success = await setContollerTime()
 
   # Rate limit GET calls to no more than one every 20 seconds. POST calls always happen and they update the status array used by the UI.
   if time_passed(equipment_status['last_pass'], 20):
@@ -423,8 +423,8 @@ async def index():
                           spalight=equipment_status['spaLight'],
                           lights=lights,
                           version=version,
-                          debug="")
-                          # debug=equipment_status)
+                          debug=""
+                          # debug=equipment_status()
                           # debug=equipment_status['poolLightSetting'])
                           # debug=gateway.get_data())
   else:
