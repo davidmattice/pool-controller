@@ -424,7 +424,7 @@ async def index():
                           spalight=equipment_status['spaLight'],
                           lights=lights,
                           version=version,
-                          debug=datetime.now())
+                          debug="")
                           # debug=equipment_status())
                           # debug=equipment_status['poolLightSetting'])
                           # debug=gateway.get_data())
