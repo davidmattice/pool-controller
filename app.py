@@ -80,6 +80,38 @@ def time_passed(oldepoch, seconds):
   return time.time() - oldepoch >= seconds
 
 #
+# Update the time
+#
+async def setContollerTime():
+  global gateway
+  global equipment_status
+  ip = None                 # IP from environment variable PC_IP_ADDR
+  hosts = None              # Hosts list to be passed to gateway connect
+
+  ip = os.getenv("PC_IP_ADDR")
+  if ip == None:
+    equipment_status['last_msg'] = "PC_IP_ADDR environment variable is not set"
+    return(False)
+
+  else:
+    # Set the hosts array for the controller
+    hosts = [{"ip": ip, "port": "80"}]
+    # Clear any previous error messages
+    equipment_status['last_msg'] = ""
+
+    try:
+      await gateway.async_connect(**hosts[0])
+      await gateway.async_set_date_time(date_time=datetime.now(), auto_dst=1)
+      await gateway.async_disconnect()
+
+    except ScreenLogicException as err:
+      equipment_status['last_msg'] = err
+      return(current_mode)
+
+  return(new_mode)
+
+
+#
 # Set the mode for the pool light
 #
 async def setLightMode(current_mode, new_mode):
@@ -283,6 +315,7 @@ async def index():
   # Initialize the rate limit control variable to the current time minus 5 minutes to ensure the status array is initialized.
   if equipment_status['last_pass'] == None:
     equipment_status['last_pass'] = time.time() - 600
+    await setContollerTime()
 
   # Rate limit GET calls to no more than one every 20 seconds. POST calls always happen and they update the status array used by the UI.
   if time_passed(equipment_status['last_pass'], 20):
