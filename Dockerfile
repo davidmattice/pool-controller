@@ -5,7 +5,7 @@ FROM python:3.12-slim-bullseye
 WORKDIR /python-docker
 
 # Allow setting/overriding the two environment variable as command line agruments
-ARG IP_ADDR=192.168.1.156
+ARG IP_ADDR=192.168.81.124
 ARG VERSION=Unknown
 
 # Set the two environment variables
