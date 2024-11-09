@@ -14,7 +14,7 @@ docker build --tag pool-controller --build-arg VERSION=$(head -1 version.txt | c
 
 Run
 ```
-docker stop pool-controller;docker rm pool-controller;docker run -d -p 5000:5000 --name pool-controller pool-controller
+docker stop pool-controller;docker rm pool-controller;docker run -d -p 5000:5000 -e TZ=$(cat /etc/timezone) --name pool-controller pool-controller
 ```
 
 ## Reverse Proxy Configuration
@@ -51,4 +51,6 @@ Update the **docker-compose** configuration (compose.yaml)
     restart: always
     ports:
       - "5000:5000"
+    environment: 
+      - TZ: "America/New_York"
 ```

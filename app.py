@@ -5,6 +5,7 @@ import argparse
 import sys
 import pprint
 import time
+from datetime import datetime, timezone
 import os
 from flask import Flask, render_template, request, url_for, flash, redirect
 from screenlogicpy.gateway import ScreenLogicGateway
@@ -65,7 +66,8 @@ equipment_status = {
   'spaHeatState': 0,
   'spaLight': 0,
   'blowerRunning': 0,
-  'heaterRunning': 0
+  'heaterRunning': 0,
+  'ControllerTime': None
 }
 
 #
@@ -78,6 +80,44 @@ app = Flask(__name__)
 #
 def time_passed(oldepoch, seconds):
   return time.time() - oldepoch >= seconds
+
+#
+# Update the time
+#
+async def setContollerTime():
+  global gateway
+  global equipment_status
+  ip = None                 # IP from environment variable PC_IP_ADDR
+  hosts = None              # Hosts list to be passed to gateway connect
+  timestamp = None
+
+  ip = os.getenv("PC_IP_ADDR")
+  if ip == None:
+    equipment_status['last_msg'] = "PC_IP_ADDR environment variable is not set"
+    return(timestamp)
+
+  else:
+    # Set the hosts array for the controller
+    hosts = [{"ip": ip, "port": "80"}]
+    # Clear any previous error messages
+    equipment_status['last_msg'] = ""
+
+    try:
+      await gateway.async_connect(**hosts[0])
+      # This sequence was taken from the CLI code.  A simple call to the SET function causes errors!
+      await gateway.async_get_datetime()
+      await gateway.async_set_date_time(date_time=datetime.now(), auto_dst=1)
+      await asyncio.sleep(1)
+      await gateway.async_get_datetime()
+      timestamp = gateway.get_data("controller", "date_time", "timestamp", strict=True)
+      await gateway.async_disconnect()
+
+    except ScreenLogicException as err:
+      equipment_status['last_msg'] = "setControllerTime() - " + err
+      return(timestamp)
+
+  return(timestamp)
+
 
 #
 # Set the mode for the pool light
@@ -253,6 +293,7 @@ async def updateGatewayData():
       equipment_status['spaHeatState'] = gateway.get_data("body", 1, "heat_state", "value")
       equipment_status['spaLight'] = gateway.get_data("circuit", SPA_LIGHT_CIRCUIT, "value")
       equipment_status['blowerRunning'] = gateway.get_data("circuit", BLOWER_CIRCUIT, "value")
+      equipment_status['ControllerTime'] = gateway.get_data("controller", "date_time", "timestamp", strict=True)
 
       # if the pool light is on, but we don't know the color, just set it to On
       if equipment_status['poolLight'] == 1 and equipment_status['poolLightSetting'] == 0:
@@ -292,6 +333,7 @@ async def index():
   # Don't process the post if the GET failed for any reason.
   if success and request.method == 'POST':
     activate = request.form.get('activate')
+    equipment_status['ControllerTime'] = await setContollerTime()
 
     # POST with a change to one of the primary control settings.
     if activate is not None:
@@ -390,8 +432,8 @@ async def index():
                           spalight=equipment_status['spaLight'],
                           lights=lights,
                           version=version,
-                          debug="")
-                          # debug=equipment_status)
+                          debug=datetime.fromtimestamp(equipment_status['ControllerTime'], tz=timezone.utc).ctime())
+                          # debug=equipment_status())
                           # debug=equipment_status['poolLightSetting'])
                           # debug=gateway.get_data())
   else:
