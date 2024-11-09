@@ -89,11 +89,12 @@ async def setContollerTime():
   global equipment_status
   ip = None                 # IP from environment variable PC_IP_ADDR
   hosts = None              # Hosts list to be passed to gateway connect
+  timestamp = None
 
   ip = os.getenv("PC_IP_ADDR")
   if ip == None:
     equipment_status['last_msg'] = "PC_IP_ADDR environment variable is not set"
-    return(False)
+    return(timestamp)
 
   else:
     # Set the hosts array for the controller
@@ -105,15 +106,17 @@ async def setContollerTime():
       await gateway.async_connect(**hosts[0])
       # This sequence was taken from the CLI code.  A simple call to the SET function causes errors!
       await gateway.async_get_datetime()
-      await gateway.async_set_date_time(date_time=datetime.now().replace(microsecond=0).isoformat(), auto_dst=1)
-      await asyncio.sleep(0.5)
+      await gateway.async_set_date_time(date_time=datetime.now(), auto_dst=1)
+      await asyncio.sleep(1)
+      await gateway.async_get_datetime()
+      timestamp = gateway.get_data("controller", "date_time", "timestamp", strict=True)
       await gateway.async_disconnect()
 
     except ScreenLogicException as err:
-      equipment_status['last_msg'] = err
-      return(False)
+      equipment_status['last_msg'] = "setControllerTime() - " + err
+      return(timestamp)
 
-  return(True)
+  return(timestamp)
 
 
 #
@@ -330,7 +333,7 @@ async def index():
   # Don't process the post if the GET failed for any reason.
   if success and request.method == 'POST':
     activate = request.form.get('activate')
-    success = await setContollerTime()
+    equipment_status['ControllerTime'] = await setContollerTime()
 
     # POST with a change to one of the primary control settings.
     if activate is not None:
