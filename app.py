@@ -5,7 +5,7 @@ import argparse
 import sys
 import pprint
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 import os
 from flask import Flask, render_template, request, url_for, flash, redirect
 from screenlogicpy.gateway import ScreenLogicGateway
@@ -66,7 +66,8 @@ equipment_status = {
   'spaHeatState': 0,
   'spaLight': 0,
   'blowerRunning': 0,
-  'heaterRunning': 0
+  'heaterRunning': 0,
+  'ControllerTime': None
 }
 
 #
@@ -102,7 +103,8 @@ async def setContollerTime():
 
     try:
       await gateway.async_connect(**hosts[0])
-      await gateway.async_set_date_time(date_time=datetime.now(), auto_dst=1)
+      # await gateway.async_set_date_time()
+      # await gateway.async_set_date_time(date_time=datetime.now(), auto_dst=1)
       await gateway.async_disconnect()
 
     except ScreenLogicException as err:
@@ -286,6 +288,7 @@ async def updateGatewayData():
       equipment_status['spaHeatState'] = gateway.get_data("body", 1, "heat_state", "value")
       equipment_status['spaLight'] = gateway.get_data("circuit", SPA_LIGHT_CIRCUIT, "value")
       equipment_status['blowerRunning'] = gateway.get_data("circuit", BLOWER_CIRCUIT, "value")
+      equipment_status['ControllerTime'] = gateway.get_data("controller", "date_time", "timestamp", strict=True)
 
       # if the pool light is on, but we don't know the color, just set it to On
       if equipment_status['poolLight'] == 1 and equipment_status['poolLightSetting'] == 0:
@@ -316,7 +319,6 @@ async def index():
   # Initialize the rate limit control variable to the current time minus 5 minutes to ensure the status array is initialized.
   if equipment_status['last_pass'] == None:
     equipment_status['last_pass'] = time.time() - 600
-#    success = await setContollerTime()
 
   # Rate limit GET calls to no more than one every 20 seconds. POST calls always happen and they update the status array used by the UI.
   if time_passed(equipment_status['last_pass'], 20):
@@ -326,6 +328,7 @@ async def index():
   # Don't process the post if the GET failed for any reason.
   if success and request.method == 'POST':
     activate = request.form.get('activate')
+    success = await setContollerTime()
 
     # POST with a change to one of the primary control settings.
     if activate is not None:
@@ -424,7 +427,7 @@ async def index():
                           spalight=equipment_status['spaLight'],
                           lights=lights,
                           version=version,
-                          debug=print(datetime.now()))
+                          debug=datetime.fromtimestamp(equipment_status['ControllerTime'], tz=timezone.utc).ctime())
                           # debug=equipment_status())
                           # debug=equipment_status['poolLightSetting'])
                           # debug=gateway.get_data())
