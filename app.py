@@ -103,8 +103,10 @@ async def setContollerTime():
 
     try:
       await gateway.async_connect(**hosts[0])
-      # await gateway.async_set_date_time()
-      # await gateway.async_set_date_time(date_time=datetime.now(), auto_dst=1)
+      # This sequence was taken from the CLI code.  A simple call to the SET function causes errors!
+      await gateway.async_get_datetime()
+      await gateway.async_set_date_time(date_time=datetime.now().replace(microsecond=0).isoformat(), auto_dst=1)
+      await asyncio.sleep(0.5)
       await gateway.async_disconnect()
 
     except ScreenLogicException as err:
